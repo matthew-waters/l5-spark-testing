@@ -8,10 +8,6 @@ Parameters:
   ReleaseLabel:
     Type: String
     Default: emr-6.15.0
-  LogUri:
-    Type: String
-  KeyName:
-    Type: AWS::EC2::KeyPair::KeyName
   SubnetId:
     Type: AWS::EC2::Subnet::Id
   MasterInstanceType:
@@ -69,13 +65,11 @@ Resources:
       Applications:
         - Name: Spark
         - Name: Hadoop
-      LogUri: !Ref LogUri
       VisibleToAllUsers: true
       JobFlowRole: !Ref JobFlowRole
       ServiceRole: !Ref ServiceRole
       Instances:
         Ec2SubnetId: !Ref SubnetId
-        Ec2KeyName: !Ref KeyName
         KeepJobFlowAliveWhenNoSteps: true
         TerminationProtected: false
         MasterInstanceGroup:

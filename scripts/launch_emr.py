@@ -204,6 +204,20 @@ def main() -> int:
     emr = session.client("emr")
     s3 = session.client("s3")
 
+    def mask(value: str) -> str:
+        if not value:
+            return ""
+        if len(value) <= 4:
+            return value
+        return f"{value[:2]}***{value[-2:]}"
+
+    print("Using AWS credentials:")
+    print(f"- AWS_ACCESS_KEY_ID={mask(os.getenv('AWS_ACCESS_KEY_ID', ''))}")
+    print(f"- AWS_SECRET_ACCESS_KEY={mask(os.getenv('AWS_SECRET_ACCESS_KEY', ''))}")
+    print(f"- AWS_SESSION_TOKEN={mask(os.getenv('AWS_SESSION_TOKEN', ''))}")
+    print(f"- AWS_REGION={os.getenv('AWS_REGION', '')}")
+    print(f"- AWS_DEFAULT_REGION={os.getenv('AWS_DEFAULT_REGION', '')}")
+
     app_path = Path(args.app_path)
     if not app_path.is_file():
         raise ValueError(f"App path not found: {app_path}")

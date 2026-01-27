@@ -1,9 +1,7 @@
 [
   { "ParameterKey": "ClusterName", "ParameterValue": "emr-test-cluster" },
   { "ParameterKey": "ReleaseLabel", "ParameterValue": "emr-6.15.0" },
-  { "ParameterKey": "LogUri", "ParameterValue": "s3://CHANGE_ME/emr-logs/" },
-  { "ParameterKey": "KeyName", "ParameterValue": "CHANGE_ME" },
-  { "ParameterKey": "SubnetId", "ParameterValue": "subnet-CHANGE_ME" },
+  { "ParameterKey": "SubnetId", "ParameterValue": "subnet-05ac6522079318ad0" },
   { "ParameterKey": "MasterInstanceType", "ParameterValue": "m5.xlarge" },
   { "ParameterKey": "CoreInstanceType", "ParameterValue": "m5.xlarge" },
   { "ParameterKey": "CoreInstanceCount", "ParameterValue": "1" },

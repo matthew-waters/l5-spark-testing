@@ -19,14 +19,42 @@ Parameters:
   CoreInstanceCount:
     Type: Number
     Default: 1
-  ServiceRole:
-    Type: String
-    Default: EMR_DefaultRole
-  JobFlowRole:
-    Type: String
-    Default: EMR_EC2_DefaultRole
-
 Resources:
+  EmrServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-EMRServiceRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: elasticmapreduce.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceRole
+
+  EmrEc2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-EMREc2Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforEC2Role
+
+  EmrEc2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub ${AWS::StackName}-EMREc2InstanceProfile
+      Roles:
+        - !Ref EmrEc2Role
+
   ArtifactBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
@@ -47,7 +75,7 @@ Resources:
           - Sid: EmrRoleAccess
             Effect: Allow
             Principal:
-              AWS: !Sub arn:aws:iam::${AWS::AccountId}:role/${JobFlowRole}
+              AWS: !GetAtt EmrEc2Role.Arn
             Action:
               - s3:GetObject
               - s3:PutObject
@@ -66,8 +94,8 @@ Resources:
         - Name: Spark
         - Name: Hadoop
       VisibleToAllUsers: true
-      JobFlowRole: !Ref JobFlowRole
-      ServiceRole: !Ref ServiceRole
+      JobFlowRole: !Ref EmrEc2InstanceProfile
+      ServiceRole: !Ref EmrServiceRole
       Instances:
         Ec2SubnetId: !Ref SubnetId
         KeepJobFlowAliveWhenNoSteps: true

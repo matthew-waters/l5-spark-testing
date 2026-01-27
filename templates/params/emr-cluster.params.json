@@ -4,7 +4,5 @@
   { "ParameterKey": "SubnetId", "ParameterValue": "subnet-05ac6522079318ad0" },
   { "ParameterKey": "MasterInstanceType", "ParameterValue": "m5.xlarge" },
   { "ParameterKey": "CoreInstanceType", "ParameterValue": "m5.xlarge" },
-  { "ParameterKey": "CoreInstanceCount", "ParameterValue": "1" },
-  { "ParameterKey": "ServiceRole", "ParameterValue": "EMR_DefaultRole" },
-  { "ParameterKey": "JobFlowRole", "ParameterValue": "EMR_EC2_DefaultRole" }
+  { "ParameterKey": "CoreInstanceCount", "ParameterValue": "1" }
 ]

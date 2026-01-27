@@ -11,9 +11,7 @@ repeatable testing.
   - `AWS_SECRET_ACCESS_KEY`
   - `AWS_SESSION_TOKEN` (optional)
   - `AWS_REGION` or `AWS_DEFAULT_REGION`
-- IAM roles in your account:
-  - `EMR_DefaultRole`
-  - `EMR_EC2_DefaultRole`
+- IAM permissions to create roles/instance profiles (stack creates them).
 
 Install Python dependencies:
 ```

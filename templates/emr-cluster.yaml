@@ -91,7 +91,7 @@ Resources:
       ServiceRole: !Ref EmrServiceRole
       Instances:
         Ec2SubnetId: !Ref SubnetId
-        KeepJobFlowAliveWhenNoSteps: false
+        KeepJobFlowAliveWhenNoSteps: true
         TerminationProtected: false
         MasterInstanceGroup:
           InstanceCount: 1

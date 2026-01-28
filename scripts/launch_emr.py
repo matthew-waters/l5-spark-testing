@@ -149,6 +149,25 @@ def wait_for_step(emr, cluster_id: str, step_id: str) -> str:
         time.sleep(30)
 
 
+def wait_for_cluster_ready(emr, cluster_id: str) -> None:
+    terminal = {"TERMINATED", "TERMINATED_WITH_ERRORS"}
+    while True:
+        status = emr.describe_cluster(ClusterId=cluster_id)["Cluster"]["Status"]["State"]
+        print(f"Cluster status: {status}")
+        if status == "WAITING":
+            return
+        if status in terminal:
+            raise RuntimeError(f"Cluster entered terminal state: {status}")
+        time.sleep(30)
+
+
+def terminate_cluster(emr, cluster_id: Optional[str]) -> None:
+    if not cluster_id:
+        return
+    emr.terminate_job_flows(JobFlowIds=[cluster_id])
+    emr.get_waiter("cluster_terminated").wait(ClusterId=cluster_id)
+
+
 def upload_app_to_s3(s3, bucket_name: str, app_path: Path, stack_name: str) -> str:
     app_key = f"apps/{stack_name}/{app_path.name}"
     s3.upload_file(str(app_path), bucket_name, app_key)
@@ -225,6 +244,7 @@ def main() -> int:
     bucket_name: Optional[str] = None
     app_key: Optional[str] = None
     output_prefix: Optional[str] = None
+    cluster_id: Optional[str] = None
 
     try:
         cfn.create_stack(
@@ -236,6 +256,7 @@ def main() -> int:
         wait_for_stack(cfn, stack_name)
         cluster_id = get_cluster_id(cfn, stack_name)
         print(f"Cluster ID: {cluster_id}")
+        wait_for_cluster_ready(emr, cluster_id)
 
         bucket_name = get_artifact_bucket(cfn, stack_name)
         app_key = upload_app_to_s3(s3, bucket_name, app_path, stack_name)
@@ -255,6 +276,10 @@ def main() -> int:
             cleanup_s3_artifacts(s3, bucket_name, app_key, output_prefix)
         except Exception as cleanup_exc:
             print(f"Cleanup warning: {cleanup_exc}")
+        try:
+            terminate_cluster(emr, cluster_id)
+        except Exception as terminate_exc:
+            print(f"Terminate warning: {terminate_exc}")
         if step_state != "COMPLETED":
             print(f"Step failed with state: {step_state}")
             status = describe_stack_status(cfn, stack_name)
@@ -272,6 +297,10 @@ def main() -> int:
                 cleanup_s3_artifacts(s3, bucket_name, app_key, output_prefix)
             except Exception as cleanup_exc:
                 print(f"Cleanup warning: {cleanup_exc}")
+            try:
+                terminate_cluster(emr, cluster_id)
+            except Exception as terminate_exc:
+                print(f"Terminate warning: {terminate_exc}")
             status = describe_stack_status(cfn, stack_name)
             print(f"Stack status: {status}")
             print_stack_events(cfn, stack_name)

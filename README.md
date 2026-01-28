@@ -28,7 +28,9 @@ pass `--env-file path/to/env` to the launcher.
 - `scripts/` Launcher scripts
 
 ## Launch a Cluster and Run a Job
-1. Update `templates/params/emr-cluster.params.json` with your `LogUri`, `KeyName`, and `SubnetId`.
+1. Update `templates/params/emr-cluster.params.json` with your `ArtifactBucketName` and `SubnetId`.
+   - The bucket must already exist.
+   - EMR logs will be written to `s3://<ArtifactBucketName>/emr-logs/`.
 2. Run the launcher:
 ```
 python scripts/launch_emr.py \

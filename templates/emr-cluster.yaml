@@ -8,6 +8,8 @@ Parameters:
   ReleaseLabel:
     Type: String
     Default: emr-6.15.0
+  ArtifactBucketName:
+    Type: String
   SubnetId:
     Type: AWS::EC2::Subnet::Id
   MasterInstanceType:
@@ -55,20 +57,10 @@ Resources:
       Roles:
         - !Ref EmrEc2Role
 
-  ArtifactBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Delete
-    Properties:
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-
   ArtifactBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref ArtifactBucket
+      Bucket: !Ref ArtifactBucketName
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -82,8 +74,8 @@ Resources:
               - s3:DeleteObject
               - s3:ListBucket
             Resource:
-              - !Sub arn:aws:s3:::${ArtifactBucket}
-              - !Sub arn:aws:s3:::${ArtifactBucket}/*
+              - !Sub arn:aws:s3:::${ArtifactBucketName}
+              - !Sub arn:aws:s3:::${ArtifactBucketName}/*
 
   EmrCluster:
     Type: AWS::EMR::Cluster
@@ -93,12 +85,13 @@ Resources:
       Applications:
         - Name: Spark
         - Name: Hadoop
+      LogUri: !Sub s3://${ArtifactBucketName}/emr-logs/
       VisibleToAllUsers: true
       JobFlowRole: !Ref EmrEc2InstanceProfile
       ServiceRole: !Ref EmrServiceRole
       Instances:
         Ec2SubnetId: !Ref SubnetId
-        KeepJobFlowAliveWhenNoSteps: true
+        KeepJobFlowAliveWhenNoSteps: false
         TerminationProtected: false
         MasterInstanceGroup:
           InstanceCount: 1
@@ -113,4 +106,4 @@ Outputs:
     Value: !Ref EmrCluster
   ArtifactBucketName:
     Description: S3 bucket for Spark artifacts and outputs
-    Value: !Ref ArtifactBucket
+    Value: !Ref ArtifactBucketName
